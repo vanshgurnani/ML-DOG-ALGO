@@ -1,5 +1,6 @@
 import numpy as np
 import joblib  # Used to load the saved model and scaler
+import pandas as pd  # To create DataFrame with correct column names
 
 class DogHealthPredictor:
     
@@ -20,8 +21,11 @@ class DogHealthPredictor:
         """
         Predict the dog's health status based on real-time sensor data using the trained model.
         """
+        # Create a DataFrame with correct column names (to match the training data)
+        input_data = pd.DataFrame([[temperature, heart_rate, accelerometer_magnitude]], 
+                                  columns=['Temperature', 'HeartRate', 'AccelMagnitude'])
+        
         # Preprocess the input data (scale it)
-        input_data = np.array([[temperature, heart_rate, accelerometer_magnitude]])
         input_scaled = self.scaler.transform(input_data)  # Scale the input data using the existing scaler
         
         # Predict health status
