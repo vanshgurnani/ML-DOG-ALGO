@@ -28,7 +28,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+    
+      # Step 4: Install Vercel CLI
+      - name: Install Vercel CLI
+        run: npm install -g vercel
 
-      # Step 4: Deploy to Vercel
+      # Step 5: Deploy to Vercel
       - name: Deploy to Vercel
         run: vercel --token CGoPquzvmCKrAiXuCm90SY7c --name ml-dog-algo --yes
