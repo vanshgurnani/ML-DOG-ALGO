@@ -54,9 +54,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 4: Deploy to Vercel
+      # Step 4: Install Vercel CLI (if not already available)
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      # Step 5: Deploy to Vercel
       - name: Deploy to Vercel
-        run: vercel deploy --yes
-        with:
-          vercel-token: CGoPquzvmCKrAiXuCm90SY7c  # You must store your Vercel token in GitHub secrets
-          vercel-project_name: ml-dog-algo  
+        run: vercel --token CGoPquzvmCKrAiXuCm90SY7c --project-name ml-dog-algo --yes
