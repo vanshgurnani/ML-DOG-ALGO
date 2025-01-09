@@ -60,4 +60,4 @@ jobs:
         uses: amondnet/vercel-action@v20
         with:
           vercel-token: CGoPquzvmCKrAiXuCm90SY7c  # You must store your Vercel token in GitHub secrets
-          vercel-project_name: ml-dog-algo  # Set your Vercel project name
+          vercel-project_name: ml-dog-algo  
