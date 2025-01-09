@@ -60,4 +60,4 @@ jobs:
 
       # Step 5: Deploy to Vercel
       - name: Deploy to Vercel
-        run: vercel --token CGoPquzvmCKrAiXuCm90SY7c --project-name ml-dog-algo --yes
+        run: vercel --token CGoPquzvmCKrAiXuCm90SY7c --name ml-dog-algo --yes
