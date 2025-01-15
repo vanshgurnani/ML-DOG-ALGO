@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Query
-import numpy as np
 import joblib
-import pandas as pd
+import math
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -13,18 +12,22 @@ class DogHealthPredictor:
         self.scaler = joblib.load(scaler_file)
     
     def compute_magnitude(self, x, y, z):
-        return np.sqrt(x**2 + y**2 + z**2)
+        # Calculate magnitude without numpy
+        return math.sqrt(x**2 + y**2 + z**2)
     
     def predict_health_status(self, temperature, heart_rate, accelerometer_magnitude):
-        input_data = pd.DataFrame([[temperature, heart_rate, accelerometer_magnitude]], 
-                                  columns=['Temperature', 'HeartRate', 'AccelMagnitude'])
+        # Prepare input data as a list of features (no need for pandas)
+        input_data = [[temperature, heart_rate, accelerometer_magnitude]]
+        
+        # Scale the input data (still using scaler)
         input_scaled = self.scaler.transform(input_data)
+        
+        # Predict health status
         prediction = self.model.predict(input_scaled)
         return prediction[0]
 
 # Initialize the DogHealthPredictor
 predictor = DogHealthPredictor()
-
 
 # Define a basic GET route
 @app.get("/")
