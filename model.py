@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import joblib  # Used to save the trained model
+import pickle  # Used to save the trained model
 
 class DogHealthMonitor:
     
@@ -140,10 +140,14 @@ class DogHealthMonitor:
     # Step 7: Save the Model
     def save_model(self, model_file='dog_health_model.pkl', scaler_file='scaler.pkl'):
         """
-        Save the trained model and scaler to files.
+        Save the trained model and scaler to files using pickle.
         """
-        joblib.dump(self.model, model_file)
-        joblib.dump(self.scaler, scaler_file)
+        with open(model_file, 'wb') as model_f:
+            pickle.dump(self.model, model_f)
+        
+        with open(scaler_file, 'wb') as scaler_f:
+            pickle.dump(self.scaler, scaler_f)
+        
         print("Model and scaler saved.")
 
 # Example Usage

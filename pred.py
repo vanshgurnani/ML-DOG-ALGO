@@ -1,12 +1,15 @@
-import joblib  # Used to load the saved model and scaler
+import pickle  # Used to load the saved model and scaler
 
 class DogHealthPredictor:
     
     def __init__(self, model_file='dog_health_model.pkl', scaler_file='scaler.pkl'):
-        # Load the pre-trained model and scaler from files
-        self.model = joblib.load(model_file)
-        self.scaler = joblib.load(scaler_file)
-    
+        # Load the pre-trained model and scaler from files using pickle
+        with open(model_file, 'rb') as model_f:
+            self.model = pickle.load(model_f)
+        
+        with open(scaler_file, 'rb') as scaler_f:
+            self.scaler = pickle.load(scaler_f)
+
     # Step 1: Compute accelerometer magnitude without using numpy or math
     def compute_magnitude(self, x, y, z):
         """
