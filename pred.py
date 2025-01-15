@@ -1,4 +1,6 @@
 import pickle  # Used to load the saved model and scaler
+from sklearn.preprocessing import StandardScaler  # Import only the required scaler
+from sklearn.ensemble import RandomForestClassifier  # Import the model type used
 
 class DogHealthPredictor:
     
