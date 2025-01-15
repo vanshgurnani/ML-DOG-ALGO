@@ -1,0 +1,8 @@
+# Ignore large model files
+*.h5
+*.pkl
+
+# Ignore unnecessary development files
+*.git
+*.vscode
+.gitignore
