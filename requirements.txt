@@ -1,4 +1,3 @@
-fastapi
-uvicorn
+Flask
 scikit-learn
 joblib
