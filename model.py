@@ -1,15 +1,15 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.utils import to_categorical
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import pickle  # Used to save the trained model
 
 class DogHealthMonitor:
     
     def __init__(self):
         self.model = None
+        self.scaler = StandardScaler()
     
     # Step 1: Compute accelerometer magnitude
     def compute_magnitude(self, x, y, z):
@@ -69,10 +69,17 @@ class DogHealthMonitor:
         """
         data = []
         labels = []
+        temp_status_list = []
+        heart_rate_status_list = []
+        accel_status_list = []
         
         # Simulate sensor data collection
         for _ in range(num_samples):
             temperature, heart_rate, accelerometer_magnitude = self.generate_sensor_data()
+            
+            # Classify sensor status
+            temp_status, heart_rate_status, accel_status = self.classify_sensor_status(
+                temperature, heart_rate, accelerometer_magnitude)
             
             # Classify overall health status based on the rules
             if 38.3 <= temperature <= 39.2 and 60 <= heart_rate <= 140 and 0.5 <= accelerometer_magnitude <= 1.5:
@@ -87,61 +94,61 @@ class DogHealthMonitor:
             # Store the data and corresponding statuses
             data.append([temperature, heart_rate, accelerometer_magnitude])
             labels.append(health_status)
+            temp_status_list.append(temp_status)
+            heart_rate_status_list.append(heart_rate_status)
+            accel_status_list.append(accel_status)
         
         # Create DataFrame for the collected data
         df = pd.DataFrame(data, columns=['Temperature', 'HeartRate', 'AccelMagnitude'])
         df['HealthStatus'] = labels
+        df['TemperatureStatus'] = temp_status_list
+        df['HeartRateStatus'] = heart_rate_status_list
+        df['AccelerometerStatus'] = accel_status_list
         
         return df
     
     # Step 5: Preprocess Data
     def preprocess_data(self, df):
         """
-        Preprocess the data without scaling the features.
+        Preprocess the data by normalizing the features.
         """
         # Extract features and labels
-        X = df[['Temperature', 'HeartRate', 'AccelMagnitude']].values
+        X = df[['Temperature', 'HeartRate', 'AccelMagnitude']]
         y = df['HealthStatus']
         
-        # Convert labels to one-hot encoding
-        label_mapping = {'Healthy': 0, 'Unwell': 1, 'Critical': 2}
-        y_encoded = to_categorical(y.map(label_mapping))
+        # Normalize features
+        X_scaled = self.scaler.fit_transform(X)
         
-        return X, y_encoded
+        return X_scaled, y
     
     # Step 6: Train the Predictive Model
     def train_predictive_model(self, X, y):
         """
-        Train a Neural Network on the data using TensorFlow.
+        Train a Random Forest Classifier on the data.
         """
         # Split data into training and test sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
-        # Build the neural network model
-        self.model = Sequential([
-            Dense(32, activation='relu', input_shape=(X.shape[1],)),
-            Dropout(0.2),
-            Dense(16, activation='relu'),
-            Dense(y.shape[1], activation='softmax')  # Softmax for multi-class classification
-        ])
+        # Train the Random Forest Classifier
+        self.model = RandomForestClassifier(n_estimators=100, random_state=42)
+        self.model.fit(X_train, y_train)
         
-        # Compile the model
-        self.model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-        
-        # Train the model
-        history = self.model.fit(X_train, y_train, epochs=20, batch_size=16, validation_data=(X_test, y_test))
-        
-        # Evaluate the model
-        loss, accuracy = self.model.evaluate(X_test, y_test)
+        # Test the model
+        accuracy = self.model.score(X_test, y_test)
         print(f'Model accuracy: {accuracy * 100:.2f}%')
-    
+        
     # Step 7: Save the Model
-    def save_model(self, model_file='dog_health_model.h5'):
+    def save_model(self, model_file='dog_health_model.pkl', scaler_file='scaler.pkl'):
         """
-        Save the trained model to a file.
+        Save the trained model and scaler to files using pickle.
         """
-        self.model.save(model_file)
-        print("Model saved.")
+        with open(model_file, 'wb') as model_f:
+            pickle.dump(self.model, model_f)
+        
+        with open(scaler_file, 'wb') as scaler_f:
+            pickle.dump(self.scaler, scaler_f)
+        
+        print("Model and scaler saved.")
 
 # Example Usage
 if __name__ == '__main__':
@@ -150,13 +157,13 @@ if __name__ == '__main__':
     
     # Step 3: Collect Data and Preprocess
     df = monitor.collect_data(num_samples=200)  # Collect 200 samples
-    X, y_encoded = monitor.preprocess_data(df)
+    X_scaled, y = monitor.preprocess_data(df)
     
-    # Display the first few rows of the data
+    # Display the first few rows of the data with individual sensor statuses
     print(df.head())
     
     # Step 5: Train the Model
-    monitor.train_predictive_model(X, y_encoded)
+    monitor.train_predictive_model(X_scaled, y)
     
     # Step 6: Save the Model
     monitor.save_model()
