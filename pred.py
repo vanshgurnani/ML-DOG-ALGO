@@ -1,3 +1,4 @@
+# pred.py
 import pickle  # Used to load the saved model and scaler
 
 class DogHealthPredictor:
