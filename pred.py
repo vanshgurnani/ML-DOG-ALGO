@@ -1,15 +1,10 @@
-# pred.py
-import pickle  # Used to load the saved model and scaler
+from tensorflow.keras.models import load_model  # Use TensorFlow's built-in model loading function
 
 class DogHealthPredictor:
     
-    def __init__(self, model_file='dog_health_model.pkl', scaler_file='scaler.pkl'):
-        # Load the pre-trained model and scaler from files using pickle
-        with open(model_file, 'rb') as model_f:
-            self.model = pickle.load(model_f)
-        
-        with open(scaler_file, 'rb') as scaler_f:
-            self.scaler = pickle.load(scaler_f)
+    def __init__(self, model_file='dog_health_model.h5'):
+        # Load the pre-trained model from file
+        self.model = load_model(model_file)  # Load the model using Keras' load_model method
 
     # Step 1: Compute accelerometer magnitude without using numpy or math
     def compute_magnitude(self, x, y, z):
@@ -26,9 +21,34 @@ class DogHealthPredictor:
         # Create a list with the correct columns instead of using pandas DataFrame
         input_data = [[temperature, heart_rate, accelerometer_magnitude]]
         
-        # Preprocess the input data (scale it)
-        input_scaled = self.scaler.transform(input_data)  # Scale the input data using the existing scaler
+        # Predict health status (probabilities)
+        prediction = self.model.predict(input_data)  # Use the model to make a prediction
+        probability = prediction[0]  # Get the prediction probabilities for each class
         
-        # Predict health status
-        prediction = self.model.predict(input_scaled)
-        return prediction[0]
+        # Assume we have two classes: Healthy (index 0) and Unhealthy (index 1)
+        healthy_prob = probability[0]
+        unhealthy_prob = probability[1]
+        
+        # Determine health status based on the probabilities
+        if unhealthy_prob > 0.8:  # Threshold for critical condition
+            return "Critical"
+        elif unhealthy_prob > 0.5:  # Threshold for unwell condition
+            return "Unwell"
+        elif healthy_prob > 0.8:  # Threshold for healthy condition
+            return "Healthy"
+        else:
+            return "Well"  # Default case if not clearly healthy or unhealthy
+
+# Example Usage
+if __name__ == '__main__':
+    # Initialize the Dog Health Predictor
+    predictor = DogHealthPredictor()
+    
+    # Example input data: Temperature, Heart Rate, Accelerometer Magnitude
+    temperature = 38.5  # Example temperature in Celsius
+    heart_rate = 75  # Example heart rate in beats per minute
+    accel_magnitude = 1.2  # Example accelerometer magnitude
+    
+    # Predict health status
+    health_status = predictor.predict_health_status(temperature, heart_rate, accel_magnitude)
+    print(f"Predicted Health Status: {health_status}")
