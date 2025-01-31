@@ -1,2 +1,2 @@
 Flask
-git+https://github.com/vanshgurnani/scikit-learn/tree/lightweight-version
+pip install git+https://github.com/vanshgurnani/scikit-learn.git@lightweight-version
