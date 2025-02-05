@@ -1,2 +1,2 @@
 Flask
-git+https://github.com/vanshgurnani/scikit-learn.git@light-version
+scikit-learn
