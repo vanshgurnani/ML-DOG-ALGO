@@ -3,167 +3,99 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import pickle  # Used to save the trained model
+from sklearn.metrics import confusion_matrix, classification_report
+import pickle
 
 class DogHealthMonitor:
-    
     def __init__(self):
         self.model = None
         self.scaler = StandardScaler()
-    
-    # Step 1: Compute accelerometer magnitude
+
     def compute_magnitude(self, x, y, z):
-        """
-        Compute the magnitude from accelerometer data (x, y, z).
-        """
         return np.sqrt(x**2 + y**2 + z**2)
-    
-    # Step 2: Simulate the generation of sensor data
-    def generate_sensor_data(self):
-        """
-        Simulate random sensor data for temperature, heart rate, and accelerometer readings.
-        """
-        temperature = np.random.uniform(37.0, 41.0)  # Random temperature between 37 and 41°C
-        heart_rate = np.random.randint(40, 180)  # Random heart rate between 40 and 180 BPM
-        x = np.random.uniform(-1, 1)
-        y = np.random.uniform(-1, 1)
-        z = np.random.uniform(-1, 1)
-        accelerometer_magnitude = self.compute_magnitude(x, y, z)
-        return temperature, heart_rate, accelerometer_magnitude
-    
-    # Step 3: Classify individual sensor statuses
-    def classify_sensor_status(self, temperature, heart_rate, accelerometer_magnitude):
-        """
-        Classify the status for each sensor.
-        """
-        # Temperature status
-        if temperature < 37.5:
-            temp_status = 'Low'
-        elif 37.5 <= temperature <= 39.2:
-            temp_status = 'Normal'
-        else:
-            temp_status = 'High'
 
-        # Heart rate status
-        if heart_rate < 50:
-            heart_rate_status = 'Low'
-        elif 50 <= heart_rate <= 140:
-            heart_rate_status = 'Normal'
+    def classify_health_status(self, heart_rate, temperature, accel_magnitude):
+        """
+        Classify the dog's health status based on predefined conditions from the table.
+        """
+        if heart_rate > 140 and temperature > 104 and accel_magnitude < 0.5:
+            return "Heatstroke"
+        elif heart_rate < 50 and temperature < 98 and accel_magnitude < 0.5:
+            return "Hypothermia"
+        elif heart_rate < 50 and accel_magnitude < 0.1:
+            return "Shock"
+        elif heart_rate > 120 and temperature > 103:
+            return "Fever"
+        elif heart_rate > 120 and accel_magnitude > 1.5:
+            return "Excitement/Anxiety"
+        elif heart_rate > 120 and accel_magnitude < 0.5:
+            return "Pain/Injury"
+        elif heart_rate > 90 and temperature > 101 and accel_magnitude > 1.0:
+            return "Active Play"
+        elif heart_rate < 60 and accel_magnitude < 0.5:
+            return "Lethargy"
+        elif heart_rate > 140 and accel_magnitude > 1.5:
+            return "Hyperthyroidism"
+        elif heart_rate < 40 or heart_rate > 150:
+            return "Heart Disease/Arrhythmia"
+        elif heart_rate > 100 and temperature > 102:
+            return "Exhaustion"
         else:
-            heart_rate_status = 'High'
+            return "Normal"
 
-        # Accelerometer status
-        if accelerometer_magnitude < 0.5:
-            accel_status = 'Low'
-        elif 0.5 <= accelerometer_magnitude <= 1.5:
-            accel_status = 'Normal'
-        else:
-            accel_status = 'High'
-
-        return temp_status, heart_rate_status, accel_status
-    
-    # Step 4: Collect Data and Label it
     def collect_data(self, num_samples=100):
-        """
-        Collects sensor data and labels it according to predefined rules.
-        """
         data = []
         labels = []
-        temp_status_list = []
-        heart_rate_status_list = []
-        accel_status_list = []
         
-        # Simulate sensor data collection
         for _ in range(num_samples):
-            temperature, heart_rate, accelerometer_magnitude = self.generate_sensor_data()
+            temperature = np.random.uniform(90, 105)
+            heart_rate = np.random.randint(25, 180)
+            x, y, z = np.random.uniform(-1, 1, 3)
+            accel_magnitude = self.compute_magnitude(x, y, z)
             
-            # Classify sensor status
-            temp_status, heart_rate_status, accel_status = self.classify_sensor_status(
-                temperature, heart_rate, accelerometer_magnitude)
-            
-            # Classify overall health status based on the rules
-            if 38.3 <= temperature <= 39.2 and 60 <= heart_rate <= 140 and 0.5 <= accelerometer_magnitude <= 1.5:
-                health_status = 'Healthy'
-            elif temperature > 39.5 or temperature < 38.0 or heart_rate > 150 or heart_rate < 50:
-                health_status = 'Unwell'
-            elif temperature > 40.0 or temperature < 37.5 or heart_rate > 180 or heart_rate < 40 or accelerometer_magnitude > 2.5:
-                health_status = 'Critical'
-            else:
-                health_status = 'Unwell'
-            
-            # Store the data and corresponding statuses
-            data.append([temperature, heart_rate, accelerometer_magnitude])
+            health_status = self.classify_health_status(heart_rate, temperature, accel_magnitude)
+            data.append([temperature, heart_rate, accel_magnitude])
             labels.append(health_status)
-            temp_status_list.append(temp_status)
-            heart_rate_status_list.append(heart_rate_status)
-            accel_status_list.append(accel_status)
         
-        # Create DataFrame for the collected data
         df = pd.DataFrame(data, columns=['Temperature', 'HeartRate', 'AccelMagnitude'])
         df['HealthStatus'] = labels
-        df['TemperatureStatus'] = temp_status_list
-        df['HeartRateStatus'] = heart_rate_status_list
-        df['AccelerometerStatus'] = accel_status_list
-        
+        df.to_csv('dog_health_data.csv', index=False)
         return df
-    
-    # Step 5: Preprocess Data
+
     def preprocess_data(self, df):
-        """
-        Preprocess the data by normalizing the features.
-        """
-        # Extract features and labels
         X = df[['Temperature', 'HeartRate', 'AccelMagnitude']]
         y = df['HealthStatus']
-        
-        # Normalize features
         X_scaled = self.scaler.fit_transform(X)
-        
         return X_scaled, y
-    
-    # Step 6: Train the Predictive Model
-    def train_predictive_model(self, X, y):
-        """
-        Train a Random Forest Classifier on the data.
-        """
-        # Split data into training and test sets
+
+    def train_model(self, X, y):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        # Train the Random Forest Classifier
         self.model = RandomForestClassifier(n_estimators=100, random_state=42)
         self.model.fit(X_train, y_train)
         
-        # Test the model
+        # Model Evaluation
+        y_pred = self.model.predict(X_test)
         accuracy = self.model.score(X_test, y_test)
+        conf_matrix = confusion_matrix(y_test, y_pred)
+        class_report = classification_report(y_test, y_pred)
+        
         print(f'Model accuracy: {accuracy * 100:.2f}%')
-        
-    # Step 7: Save the Model
+        print("Confusion Matrix:")
+        print(conf_matrix)
+        print("Classification Report:")
+        print(class_report)
+
     def save_model(self, model_file='dog_health_model.pkl', scaler_file='scaler.pkl'):
-        """
-        Save the trained model and scaler to files using pickle.
-        """
-        with open(model_file, 'wb') as model_f:
-            pickle.dump(self.model, model_f)
-        
-        with open(scaler_file, 'wb') as scaler_f:
-            pickle.dump(self.scaler, scaler_f)
-        
+        with open(model_file, 'wb') as mf:
+            pickle.dump(self.model, mf)
+        with open(scaler_file, 'wb') as sf:
+            pickle.dump(self.scaler, sf)
         print("Model and scaler saved.")
 
-# Example Usage
 if __name__ == '__main__':
-    # Initialize the Dog Health Monitor
     monitor = DogHealthMonitor()
-    
-    # Step 3: Collect Data and Preprocess
-    df = monitor.collect_data(num_samples=200)  # Collect 200 samples
+    df = monitor.collect_data(num_samples=5000)
     X_scaled, y = monitor.preprocess_data(df)
-    
-    # Display the first few rows of the data with individual sensor statuses
     print(df.head())
-    
-    # Step 5: Train the Model
-    monitor.train_predictive_model(X_scaled, y)
-    
-    # Step 6: Save the Model
+    monitor.train_model(X_scaled, y)
     monitor.save_model()

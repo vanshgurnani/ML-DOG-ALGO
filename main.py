@@ -36,7 +36,12 @@ def predict_health():
     # Predict health status
     health_status = predictor.predict_health_status(temperature, heart_rate, accel_magnitude)
     
-    return jsonify({"health_status": health_status})
+    return jsonify({
+        "health_status": health_status,
+        "temperature": temperature, 
+        "heart_rate": heart_rate, 
+        "accel_magnitude": accel_magnitude
+        })
 
 if __name__ == "__main__":
     app.run(debug=True)

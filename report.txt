@@ -1,0 +1,35 @@
+   Temperature  HeartRate  AccelMagnitude              HealthStatus
+0   100.597255        151        0.999161  Heart Disease/Arrhythmia
+1   100.121218        154        0.844716  Heart Disease/Arrhythmia
+2   104.516827        108        0.871763                Exhaustion
+3   100.071480         62        0.626029                    Normal
+4   102.597821        103        1.326989               Active Play
+Model accuracy: 99.50%
+Confusion Matrix:
+[[ 44   0   0   0   0   0   0   0   0]
+ [  1   4   0   0   0   0   0   1   0]
+ [  0   0  21   0   0   0   0   0   0]
+ [  2   0   0  47   0   0   0   0   0]
+ [  0   0   0   0 228   0   0   0   0]
+ [  0   0   0   0   0   7   0   0   0]
+ [  0   0   0   0   0   0   8   0   0]
+ [  0   0   0   0   0   0   1 615   0]
+ [  0   0   0   0   0   0   0   0  21]]
+Classification Report:
+                          precision    recall  f1-score   support
+
+             Active Play       0.94      1.00      0.97        44
+      Excitement/Anxiety       1.00      0.67      0.80         6
+              Exhaustion       1.00      1.00      1.00        21
+                   Fever       1.00      0.96      0.98        49
+Heart Disease/Arrhythmia       1.00      1.00      1.00       228
+             Hypothermia       1.00      1.00      1.00         7
+                Lethargy       0.89      1.00      0.94         8
+                  Normal       1.00      1.00      1.00       616
+             Pain/Injury       1.00      1.00      1.00        21
+
+                accuracy                           0.99      1000
+               macro avg       0.98      0.96      0.97      1000
+            weighted avg       1.00      0.99      0.99      1000
+
+Model and scaler saved.
