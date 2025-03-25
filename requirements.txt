@@ -3,5 +3,5 @@ scikit-learn
 gunicorn
 numpy
 pandas
-tensorflow
+tensorflow-cpu
 joblib

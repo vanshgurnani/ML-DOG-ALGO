@@ -1,5 +1,5 @@
 import os
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU, force CPU
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
