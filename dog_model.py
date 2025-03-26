@@ -26,19 +26,18 @@ y = df["Emotion"].values
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Define Model
 model = Sequential([
-    Bidirectional(LSTM(64, return_sequences=True, time_major=False), input_shape=(1, X.shape[2])),
+    Bidirectional(LSTM(64, return_sequences=True), input_shape=(X.shape[1], X.shape[2])),  # Use correct input shape
     Dropout(0.2),
     Bidirectional(LSTM(32)),
     Dropout(0.2),
     Dense(16, activation='relu'),
     Dense(len(label_encoder.classes_), activation='softmax')
 ])
-
+print(X_train.shape)  # Should be (num_samples, time_steps, features)
+print(y_train.shape)  # Should match the number of samples
 model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
-# Train Model
 history = model.fit(X_train, y_train, epochs=50, batch_size=100, validation_data=(X_test, y_test), verbose=1)
 
 # Evaluate Model
