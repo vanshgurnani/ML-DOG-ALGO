@@ -2,6 +2,7 @@ import os
 # # Disable all GPU devices
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # Suppress unnecessary TensorFlow logs
+os.environ['TF_GRAPPLER_DISABLE'] = '1'
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import numpy as np
 import pandas as pd

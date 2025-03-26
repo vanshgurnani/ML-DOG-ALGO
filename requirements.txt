@@ -3,5 +3,6 @@ scikit-learn
 gunicorn
 numpy
 pandas
-tensorflow==2.18.0
+tensorflow==2.9.0
+keras==2.9.0
 joblib

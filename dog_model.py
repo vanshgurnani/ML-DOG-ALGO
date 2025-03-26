@@ -28,7 +28,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Define Model
 model = Sequential([
-    Bidirectional(LSTM(64, return_sequences=True), input_shape=(1, X.shape[2])),
+    Bidirectional(LSTM(64, return_sequences=True, time_major=False), input_shape=(1, X.shape[2])),
     Dropout(0.2),
     Bidirectional(LSTM(32)),
     Dropout(0.2),
