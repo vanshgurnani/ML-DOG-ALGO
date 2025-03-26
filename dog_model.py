@@ -26,18 +26,22 @@ y = df["Emotion"].values
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+# Update model architecture with Input layer
 model = Sequential([
-    Bidirectional(LSTM(64, return_sequences=True), input_shape=(X.shape[1], X.shape[2])),  # Use correct input shape
+    tf.keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])),  # Explicit input layer
+    Bidirectional(LSTM(64, return_sequences=True)),
     Dropout(0.2),
     Bidirectional(LSTM(32)),
     Dropout(0.2),
     Dense(16, activation='relu'),
     Dense(len(label_encoder.classes_), activation='softmax')
 ])
-print(X_train.shape)  # Should be (num_samples, time_steps, features)
-print(y_train.shape)  # Should match the number of samples
-model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
+# Verify data shapes
+print("X_train shape:", X_train.shape)  # Should be (samples, timesteps=1, features=3)
+print("y_train shape:", y_train.shape)
+
+model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 history = model.fit(X_train, y_train, epochs=50, batch_size=100, validation_data=(X_test, y_test), verbose=1)
 
 # Evaluate Model
