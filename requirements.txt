@@ -3,5 +3,5 @@ scikit-learn
 gunicorn
 numpy
 pandas
-tensorflow-cpu
+tensorflow==2.18.0
 joblib
