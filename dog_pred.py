@@ -1,46 +1,39 @@
-import os
-# # Disable all GPU devices
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-# Suppress unnecessary TensorFlow logs
-os.environ['TF_GRAPPLER_DISABLE'] = '1'
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
-import joblib
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import LabelEncoder
 
-# Load Model & Preprocessing Objects
+# Load model
 model = load_model("dog_emotion_model.h5")
-label_encoder_classes = np.load("label_encoder_classes.npy", allow_pickle=True)
-scaler = joblib.load("dog_scaler.pkl")
+
+# Load preprocessing objects
+label_encoder = LabelEncoder()
+label_encoder.classes_ = np.load("label_encoder_classes.npy", allow_pickle=True)
+
+scaler = MinMaxScaler()
+scaler.min_ = np.load("scaler_min.npy", allow_pickle=True)
+scaler.scale_ = np.load("scaler_scale.npy", allow_pickle=True)
 
 def predict_emotion(data):
-    """
-    Predicts the dog's emotion based on input sensor data.
+    """Predicts dog's emotion based on input physiological data."""
+    # Adjust input keys to match expected feature names
+    df = pd.DataFrame([{
+        "Heart Rate (bpm)": data["hearRate"],
+        "Body Temperature (°C)": data["bodyTemperature"],
+        "Tail Wagging (m/s²)": data["accelMagnitude"]
+    }])
 
-    Parameters:
-        data (dict): Contains 'hearRate', 'bodyTemperature', and 'accelMagnitude'.
-
-    Returns:
-        dict: Predicted emotion and confidence score.
-    """
-    # Map received JSON keys to model expected feature names
-    formatted_data = {
-        "Heart Rate (bpm)": data.get("hearRate"),
-        "Body Temperature (°C)": data.get("bodyTemperature"),
-        "Tail Wagging (m/s²)": data.get("accelMagnitude")
-    }
-
-    # Convert to DataFrame and scale
-    df = pd.DataFrame([formatted_data])
-    df[df.columns] = scaler.transform(df[df.columns])
+    # Normalize input
+    features = ["Heart Rate (bpm)", "Body Temperature (°C)", "Tail Wagging (m/s²)"]
+    df[features] = scaler.transform(df[features])
 
     X_input = df.values.reshape((1, 1, df.shape[1]))
 
     # Make prediction
     y_pred = model.predict(X_input)
     predicted_class = y_pred.argmax(axis=1)[0]
-    predicted_emotion = label_encoder_classes[predicted_class]
-    confidence_score = float(y_pred[0][predicted_class])  # Convert to float for JSON serialization
+    predicted_emotion = label_encoder.inverse_transform([predicted_class])[0]
+    confidence_score = y_pred[0][predicted_class]
 
-    return {"emotion": predicted_emotion, "confidence": confidence_score}
+    return {"emotion": predicted_emotion }
